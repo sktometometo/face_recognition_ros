@@ -14,7 +14,8 @@ class FaceRecognizer(object):
     Face Recognizer Class with Extract features of faces with dlib and classify it with svm or knn.
     """
 
-  def __init__(self, known_person_image_dir, fitting='svm'):
+  def __init__(self, known_person_image_dir, fitting, recognition_method,
+               feature_model):
     """
         Image Directory
             <known_person_image_dir>/
@@ -40,6 +41,9 @@ class FaceRecognizer(object):
                     <person_n_face-n>.jpg
         """
 
+    self.recognition_method = recognition_method
+    self.feature_model = feature_model
+
     encodings = []
     names = []
 
@@ -50,10 +54,12 @@ class FaceRecognizer(object):
       for picture_file in pictures:
         fullpath = person_dir + '/' + picture_file
         person_picture = face_recognition.load_image_file(fullpath)
-        face_bboxes = face_recognition.face_locations(person_picture,
-                                                      model='cnn')
+        face_bboxes = face_recognition.face_locations(
+            person_picture, model=self.recognition_method)
         face_encs = face_recognition.face_encodings(
-            person_picture, known_face_locations=face_bboxes, model='large')
+            person_picture,
+            known_face_locations=face_bboxes,
+            model=self.feature_model)
         if len(face_bboxes) == 0:
           rospy.logwarn(
               '{}, contains {} persons. So this file is skipped.'.format(
@@ -82,9 +88,10 @@ class FaceRecognizer(object):
 
   def recognize_person(self, image, distance_threshold=0.6):
 
-    face_locations = face_recognition.face_locations(image, model='cnn')
+    face_locations = face_recognition.face_locations(
+        image, model=self.recognition_method)
     face_encodings = face_recognition.face_encodings(
-        image, known_face_locations=face_locations, model='large')
+        image, known_face_locations=face_locations, model=self.feature_model)
     if self.fitting == 'svm':
       names = self.classifier.predict(face_encodings)
       return names, face_locations

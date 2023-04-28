@@ -14,7 +14,16 @@ class FaceClassifier:
 
     known_person_image_dir = rospy.get_param('~known_person_image_dir')
     fitting_method = rospy.get_param('~fitting_method', 'svm')
-    self.recognizer = FaceRecognizer(known_person_image_dir, fitting_method)
+    recognition_method = rospy.get_param(
+        '~recognition_method', 'hog'
+    )  # See https://github.com/ageitgey/face_recognition/blob/2e2dccea9dd0ce730c8d464d0f67c6eebb40c9d1/face_recognition/api.py#L114-L115
+    feature_extraction_model = rospy.get_param(
+        '~feature_extraction_model', 'small'
+    )  # See https://github.com/ageitgey/face_recognition/blob/2e2dccea9dd0ce730c8d464d0f67c6eebb40c9d1/face_recognition/api.py#L210
+
+    self.recognizer = FaceRecognizer(known_person_image_dir, fitting_method,
+                                     recognition_method,
+                                     feature_extraction_model)
 
     self.cv_bridge = cv_bridge.CvBridge()
 
